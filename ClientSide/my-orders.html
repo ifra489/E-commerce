@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📦 My Orders</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+ .order-card {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  margin: 15px auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+  max-width: 600px;   /* ✅ max width to prevent full-width */
+  width: 95%;         /* ✅ responsive fit */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+.order-card h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #222;
+}
+/* ==== BUTTONS ==== */
+.order-card button {
+  margin: 8px 10px 0 0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; 
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width:90%;
+      max-width: 600px;
+    }
+    .close {
+      float: right;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    table, th, td { border: 1px solid #ddd; padding: 8px; }
+
+
+/* Primary (View Details) */
+.order-card button:first-of-type {
+  background: #032558;
+  color: #fff;
+}
+.order-card button:first-of-type:hover {
+  background: #0b5ed7;
+  transform: scale(1.03);
+}
+
+/* Secondary (Track Order) */
+.order-card button:last-of-type {
+  background: #198754;
+  color: #fff;
+}
+.order-card button:last-of-type:hover {
+  background: #058a4c;
+  transform: scale(1.03);
+}
+
+/* ==== RESPONSIVE DESIGN ==== */
+@media (max-width: 768px) {
+  .order-card {
+    padding: 15px;
+    max-width: 95%;
+  }
+  .order-card h3 {
+    font-size: 16px;
+  }
+  .order-card p {
+    font-size: 14px;
+  }
+  .order-card button {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+  .order-card h3 {
+    font-size: 15px;
+  }
+  .order-card p {
+    font-size: 13px;
+    margin: 4px 0;
+  }
+  .order-card button {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+  }
+}
+
+
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+
+  <header class="navbar">
+    <div class="logo">MyStore</div>
+    <div class="nav-actions" id="nav-actions"></div>
+  </header>
+
+  <!-- Main -->
+  <main>
+    <h1>My Orders</h1>
+    <div id="orders-container">⏳ Loading your orders...</div>
+  </main>
+
+  <!-- Order Details Modal -->
+  <div id="order-details-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Order Details</h2>
+      <div id="modal-body">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+  // ================= Navbar =================
+  function updateNavbar() {
+    const navActions = document.getElementById("nav-actions");
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+      navActions.innerHTML = `
+        <button onclick="viewCart()">🛒 Cart (<span id='cart-count'>0</span>)</button>
+        <a href="my-orders.html">📦 My Orders</a> | 
+        <a href="profile.html">👤 Profile</a> | 
+        <a href="#" onclick="logout()">🚪 Logout</a>
+      `;
+    } else {
+      navActions.innerHTML = `
+        <button onclick="viewCart()">🛒 Cart (<span id='cart-count'>0</span>)</button>
+        <a href="loginregister.html">Sign In</a> | 
+        <a href="loginregister.html">Sign Up</a>
+      `;
+    }
+  }
+
+  // ================= Logout =================
+  function logout() {
+    localStorage.clear();
+    alert("🚪 You have been logged out.");
+    window.location.href = "loginregister.html";
+  }
+
+  // ================= fetchWithAuth =================
+  async function fetchWithAuth(url, options={}) {
+    let accessToken = localStorage.getItem("accessToken");
+    if (!options.headers) options.headers = {};
+    options.headers["Authorization"] = `Bearer ${accessToken}`;
+    options.headers["Content-Type"] = "application/json";
+
+    let response = await fetch(url, options);
+
+    if (response.status === 401) {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) { logout(); return; }
+
+      const refreshResponse = await fetch("http://localhost:5000/api/auth/refresh", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ refreshToken })
+      });
+
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        options.headers["Authorization"] = `Bearer ${data.accessToken}`;
+        response = await fetch(url, options);
+      } else {
+        logout();
+      }
+    }
+    return response;
+  }
+
+  // ================= Fetch Orders =================
+  async function fetchOrders() {
+    const container = document.getElementById("orders-container");
+    try {
+      const response = await fetchWithAuth("http://localhost:5000/api/orders/my-orders");
+      if (!response.ok) {
+        container.innerHTML = "<p>⚠️ Failed to load orders.</p>";
+        return;
+      }
+
+      const orders = await response.json();
+      container.innerHTML = "";
+
+      if (!orders.length) {
+        container.innerHTML = "<p>📭 You have no orders yet.</p>";
+        return;
+      }
+
+orders.forEach(order => {
+  const card = document.createElement("div");
+  card.className = "order-card";
+
+  // ✅ Calculate final total (items + delivery charges)
+  const itemsTotal = order.totalPrice || 0;
+  const deliveryCharges = order.deliveryCharges || 0;
+  const finalTotal = itemsTotal + deliveryCharges;
+
+  card.innerHTML = `
+    <h3>Order #${order._id}</h3>
+    <p>Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
+    <p>Items: ${order.items.length}</p>
+    <p>Items Total: Rs ${itemsTotal}</p>
+    <p>Delivery Charges: Rs ${deliveryCharges}</p>
+    <p><strong>Final Total: Rs ${finalTotal}</strong></p>
+    <p>Status: <strong>${order.status}</strong></p>
+    <button onclick="viewOrderDetails('${order._id}')">View Details</button>
+    <button onclick="trackOrder('${order._id}', '${order.status}')">Track Order</button>
+  `;
+
+  container.appendChild(card);
+});
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = "<p>❌ Error loading orders.</p>";
+    }
+  }
+
+  // ================= Order Details =================
+  async function viewOrderDetails(orderId) {
+    try {
+      const modalBody = document.getElementById("modal-body");
+      modalBody.innerHTML = "⏳ Loading...";
+      document.getElementById("order-details-modal").style.display = "flex";
+
+      const response = await fetchWithAuth(`http://localhost:5000/api/orders/${orderId}`);
+      if (!response.ok) throw new Error("Failed to fetch order details");
+
+      const order = await response.json();
+
+      let itemsHtml = order.items.map(item => `
+        <tr>
+          <td>${item.name || "Product"}</td>
+          <td>${item.size || "-"}</td>
+          <td>${item.quantity}</td>
+          <td>Rs: ${item.price}</td>
+        </tr>
+      `).join("");
+
+      modalBody.innerHTML = `
+        <p><strong>Order ID:</strong> ${order._id}</p>
+        <p><strong>Date:</strong> ${new Date(order.createdAt).toLocaleDateString()}</p>
+        <p><strong>Status:</strong> ${order.status}</p>
+        <p><strong>Shipping Address:</strong> ${order.address || "-"}</p>
+        <table>
+          <thead>
+            <tr><th>Product</th><th>Size</th><th>Quantity</th><th>Price</th></tr>
+          </thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <p><strong>Total:</strong> Rs: ${order.totalPrice}</p>
+      `;
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  }
+
+  function closeModal() {
+    document.getElementById("order-details-modal").style.display = "none";
+  }
+  window.onclick = e => {
+    if (e.target === document.getElementById("order-details-modal")) closeModal();
+  };
+
+  // ================= Track Order =================
+  function trackOrder(orderId, status) {
+    alert(`📍 Order #${orderId} is currently: ${status}`);
+  }
+
+  // ================= Init =================
+  if (!localStorage.getItem("accessToken")) {
+    window.location.href = "loginregister.html";
+  } else {
+    updateNavbar();
+    fetchOrders();
+  }
+  </script>
+</body>
+</html>

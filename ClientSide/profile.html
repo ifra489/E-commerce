@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - MyStore</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body 
+    { 
+      font-family: Arial, sans-serif;
+       background: #f4f4f4;
+        margin: 0;
+       padding: 0; }
+    .profile-container { max-width: 600px; margin: 40px auto; background: #fff; padding: 20px; border-radius: 8px; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .btn { background: #022244; color: white; border: none; padding: 10px; margin-top: 10px; width: 40%; display:block; margin: 10px auto; cursor: pointer; border-radius: 5px; font-size: 16px; }
+    .btn:hover { opacity: 0.9; background-color: #093f79; }
+    .btn-logout { background: #494747; }
+    .btn-logout:hover { background: #000000; }
+    .btn-delete { background: #c90303; }
+    .btn-delete:hover { background: #eb0202; }
+    .support-box { margin-top: 30px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+<div class="profile-container">
+  <h1>User Profile</h1>
+
+  <!-- Saved Address -->
+  <div class="form-group">
+    <label for="savedAddress">Saved Address</label>
+    <textarea id="savedAddress" placeholder="Enter your address..."></textarea>
+    <button class="btn" onclick="saveAddress()">💾 Save Address</button>
+  </div>
+
+  <!-- Support Section -->
+  <div class="support-box">
+    <h3>Need Help?</h3>
+    <p>If you want to cancel an order or need any help, please contact our support team:</p>
+    <p>📧 support@mystore.com</p>
+    <p>📞 +92-300-1234567</p>
+    <button class="btn" onclick="contactSupport()">📩 Contact Support</button>
+  </div>
+
+  <!-- Logout & Delete Account -->
+  <button class="btn btn-logout" onclick="logout()">🚪 Logout</button>
+  <button class="btn btn-delete" onclick="deleteAccount()">🗑️ Delete Account</button>
+</div>
+
+<script>
+  // ✅ Helper: check if user is logged in
+  function isLoggedIn() {
+    return !!localStorage.getItem("accessToken") || !!localStorage.getItem("refreshToken");
+  }
+
+  // ✅ Refresh access token if needed
+  async function ensureAccessToken() {
+    let accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (!accessToken && !refreshToken) {
+      // Not logged in at all
+      window.location.href = "loginregister.html?redirect=profile.html";
+      return null;
+    }
+
+    if (!accessToken && refreshToken) {
+      // Try to refresh access token
+      try {
+        const response = await fetch("/api/refresh-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken })
+        });
+        const data = await response.json();
+        if (data.accessToken) {
+          localStorage.setItem("accessToken", data.accessToken);
+          accessToken = data.accessToken;
+        } else {
+          throw new Error("Refresh failed");
+        }
+      } catch (err) {
+        // Refresh failed, log out
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("email");
+        localStorage.removeItem("cart");
+        localStorage.removeItem("savedAddress");
+        window.location.href = "loginregister.html?redirect=profile.html";
+        return null;
+      }
+    }
+
+    return accessToken;
+  }
+
+  // ✅ Initialize profile page
+  document.addEventListener("DOMContentLoaded", async () => {
+    const token = await ensureAccessToken();
+    if (!token) return; // redirected to login if invalid
+
+    // Load saved address
+    const savedAddress = localStorage.getItem("savedAddress");
+    if (savedAddress) {
+      document.getElementById("savedAddress").value = savedAddress;
+    }
+  });
+
+  // ✅ Save address
+  function saveAddress() {
+    const address = document.getElementById("savedAddress").value;
+    if (address.trim() === "") {
+      alert("⚠️ Please enter an address first!");
+      return;
+    }
+    localStorage.setItem("savedAddress", address);
+    alert("✅ Address saved successfully!");
+  }
+
+  // ✅ Contact support
+  function contactSupport() {
+    alert("📩 Please send us an email at support@mystore.com\nor call +92-300-1234567");
+  }
+
+  // ✅ Logout
+  function logout() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("email");
+    localStorage.removeItem("cart");
+    localStorage.removeItem("savedAddress");
+
+    const url = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, url);
+
+    alert("🚪 You have been logged out.");
+    window.location.href = "index.html";
+  }
+
+  // ✅ Delete account
+  function deleteAccount() {
+    if (confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("email");
+      localStorage.removeItem("cart");
+      localStorage.removeItem("savedAddress");
+
+      alert("🗑️ Your account has been deleted.");
+      window.location.href = "index.html";
+    }
+  }
+</script>
+
+</body>
+</html>

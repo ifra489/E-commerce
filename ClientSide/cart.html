@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Shopping Cart - MyStore</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+<body>
+ 
+  
+
+<!-- Navbar -->
+<header class="navbar">
+  <div class="logo">MyStore</div>
+
+  
+
+  <div class="nav-actions" id="nav-actions"></div>
+</header>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    updateNavbar();
+  });
+
+  function updateNavbar() {
+    const navActions = document.getElementById("nav-actions");
+    if (!navActions) return;
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (accessToken) {
+      navActions.innerHTML = `
+        
+        <a href="my-orders.html">📦 My Orders</a> |
+        <a href="profile.html">👤 Profile</a> |
+        <a href="#" onclick="logout()">🚪 Logout</a>
+      `;
+    } else {
+      navActions.innerHTML = `
+       
+        <a href="#" onclick="saveRedirect('loginregister.html')">Sign In</a> |
+        <a href="#" onclick="saveRedirect('loginregister.html')">Sign Up</a>
+      `;
+    }
+  }
+
+  // ✅ Save redirect location before going to login/register
+  function saveRedirect(url) {
+    localStorage.setItem("redirectAfterLogin", window.location.href);
+    window.location.href = url;
+  }
+
+  // ✅ Logout
+  function logout() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("email");
+    localStorage.removeItem("cart");
+    localStorage.removeItem("savedAddress");
+
+    updateNavbar();
+    alert("🚪 You have been logged out.");
+    window.location.href = "index.html";
+  }
+</script>
+
+
+    <!-- Main Content -->
+    <main class="cart-page">
+        <div class="container">
+            <h1>🛒 Shopping Cart</h1>
+            
+            <!-- Cart Items -->
+            <div id="cart-items" class="cart-items">
+                <!-- Cart items will be loaded here by JavaScript -->
+            </div>
+            
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Total Items:</span>
+                    <span id="total-items">0</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total Price:</span>
+                    <span id="cart-total">Rs 0</span>
+                </div>
+                <div class="cart-actions">
+                    <button onclick="clearCart()" class="clear-btn">Clear Cart</button>
+                    <button onclick="proceedToCheckout()" class="checkout-btn" id="checkoutBtn">Proceed to Pay</button>
+                   
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Help</h4>
+                <ul>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 MyStore - All Rights Reserved</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/cart.js"></script>
+    <script>
+        // Update total items display
+        function updateTotalItems() {
+            const totalItemsElement = document.getElementById('total-items');
+            if (totalItemsElement) {
+                totalItemsElement.textContent = calculateTotalItems();
+            }
+        }
+
+        // Override displayCart to also update total items
+        const originalDisplayCart = displayCart;
+        displayCart = function() {
+            originalDisplayCart();
+            updateTotalItems();
+        };
+        
+    </script>
+
+</body>
+</html>
