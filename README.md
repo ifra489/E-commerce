@@ -101,6 +101,11 @@ Version    →  Git & GitHub
 
 ![Orders](./screenshots/register.jpeg)
 
+###  PDF
+
+
+![Orders](./screenshots/pdf.jpeg)
+
 
 
 ### ⚙️ Admin Panel
@@ -108,12 +113,22 @@ Version    →  Git & GitHub
 
 ![Admin](./screenshots/admin.jpeg)
 
+### Cart
+
+
+![Admin](./screenshots/product.jpeg)
+
 
 
 ### 📄 Order Confirmation Email
 
 
 ![Email](./screenshots/email.jpeg)
+
+### 📄 Order
+
+
+![Email](./screenshots/order.jpeg)
 
 
 
