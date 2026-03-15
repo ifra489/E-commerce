@@ -85,35 +85,35 @@ Version    →  Git & GitHub
 ### 🏪 Product Catalog
 
 
-![Store](./screenshots/store.png)
+![Store](./screenshots/store.jpeg)
 
 
 
-### 🔐 Login & Register
+### 🔐 Login 
 
 
-![Login](./screenshots/login.png)
+![Login](./screenshots/login.jpeg)
 
 
 
-### 📦 My Orders
+### 🔐 Register
 
 
-![Orders](./screenshots/orders.png)
+![Orders](./screenshots/register.jpeg)
 
 
 
 ### ⚙️ Admin Panel
 
 
-![Admin](./screenshots/admin.png)
+![Admin](./screenshots/admin.jpeg)
 
 
 
 ### 📄 Order Confirmation Email
 
 
-![Email](./screenshots/email.png)
+![Email](./screenshots/email.jpeg)
 
 
 
