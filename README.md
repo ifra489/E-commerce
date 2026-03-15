@@ -19,8 +19,8 @@ Users can browse products, add items to the cart, place orders, and manage their
 ## Tech Stack
 
 - **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Node.js, Express.js / PHP / Laravel (specify your stack)
-- **Database**: MongoDB / MySQL (specify your DB)
+- **Backend**: Node.js
+- **Database**: MongoDB  (specify your DB)
 - **Version Control**: Git & GitHub
 
 ---
@@ -30,20 +30,29 @@ Users can browse products, add items to the cart, place orders, and manage their
 1. Clone the repository:
 ```bash
 git clone https://github.com/<username>/<repository>.git
-
+```
 2.Navigate to the project folder:
+```
 cd <repository>
-
+```
 3.Install dependencies (for Node.js project):
 npm install
 
 4.Start the server:
+```
 node server.js
-
+```
 5.Open in browser:
+```
 http://localhost:5000
-
-##Usage
+```
+## Screenshot
+![homepicture](home.png)
+![homepicture](home.png)
+![homepicture](home.png)
+![homepicture](home.png)
+![homepicture](home.png)
+## Usage
 Browse products and view details.
 
 Add items to your shopping cart.
@@ -52,6 +61,6 @@ Register/login to place orders.
 
 Admin can manage products and users.
 
-##Contribution
+## Contribution
 Contributions are welcome! Fork the repository, make changes, and submit a pull request.
 
