@@ -1,7 +1,7 @@
 # 🛍️ MyStore — Full Stack E-Commerce Platform
 
 <div align="center">
-
+.
 
 
 ![MyStore](https://img.shields.io/badge/MyStore-E--Commerce-1a1a2e?style=for-the-badge&logo=shopify&logoColor=white)
